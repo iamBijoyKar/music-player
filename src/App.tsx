@@ -15,8 +15,8 @@ type song = {
 }
 
 function App() {
-  const x_rapidapi_key: string = import.meta.env.VITE_X_RAPIDAPI_KEY
-  const x_rapidapi_host: string = import.meta.env.VITE_X_RAPIDAPI_HOST
+  // const x_rapidapi_key: string = import.meta.env.VITE_X_RAPIDAPI_KEY
+  // const x_rapidapi_host: string = import.meta.env.VITE_X_RAPIDAPI_HOST
 
   const [songs, setSongs] = useState<song[]>([])
   const [playingSong, setPlayingSong] = useState<song>({})

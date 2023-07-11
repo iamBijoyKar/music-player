@@ -19,20 +19,26 @@ process.env.PUBLIC = app.isPackaged
   ? process.env.DIST
   : path.join(process.env.DIST, "../public")
 
+const isDev = process.env.NODE_ENV !== 'production'
+
 let win: BrowserWindow | null
 // 🚧 Use ['ENV_NAME'] avoid vite:define plugin - Vite@2.x
 const VITE_DEV_SERVER_URL = process.env["VITE_DEV_SERVER_URL"]
 
 function createWindow() {
   win = new BrowserWindow({
-    icon: path.join(process.env.PUBLIC, "electron-vite.svg"),
+    autoHideMenuBar: true,
+    title: 'Momo Player',
+    icon: path.join(process.env.PUBLIC, "peach.png"),
     webPreferences: {
       preload: path.join(__dirname, "preload.js"),
     },
   })
 
   // DevTools for debug
-  win.webContents.openDevTools()
+  if(isDev){
+    win.webContents.openDevTools()
+  }
 
   // Test active push message to Renderer-process.
   win.webContents.on("did-finish-load", () => {
