@@ -33,6 +33,20 @@ function App() {
 
   const [page, setPage] = useState<string>("home")
 
+  const generatePage = () => {
+    switch (page) {
+      case "home":
+        return <Home changeSong={setPlayingSong} songs={songs} />
+      case "library":
+        return <h1>Playlist</h1>
+      case "settings":
+        return <h1>Settings</h1>
+      case "search":
+        return <h1>Search</h1>
+      default:
+        return <h1>Home</h1>
+    }
+  }
 
 
   return (
@@ -41,7 +55,7 @@ function App() {
         <SideBar page={page} changePage={setPage} />
         <div className='w-full p-4 relative'>
           <Header page={page} changePage={setPage} />
-          <Home changeSong={setPlayingSong} songs={songs} />
+          {generatePage()}
           <Player song={playingSong} />
         </div>
       </div>
