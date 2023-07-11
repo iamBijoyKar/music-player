@@ -10,7 +10,7 @@ import { HiOutlineSpeakerXMark } from "react-icons/hi2"
 import { FaPause } from "react-icons/fa"
 import { IconButton, Slider } from "@material-tailwind/react"
 import { intoMinutes } from "../ts/utils"
-import { useState } from "react"
+import { useState, useEffect, useMemo } from "react"
 // import {Howl} from 'howler'
 
 type prop = {
@@ -19,31 +19,58 @@ type prop = {
     filePath: string
     baseName: string
   }
+  playingSongObject: HTMLAudioElement
 }
 
-export default function Player({ song }: prop) {
-  const { songName, filePath } = song
+export default function Player({ song, playingSongObject }: prop) {
+  const { songName, filePath  } = song
   const [isPlaying, setIsPlaying] = useState(false)
-  const totalTime = intoMinutes(100)
-  const currentTime = intoMinutes(50)
-  const audio = new Audio(`my-magic-protocol://getMediaFile/${filePath}`)
+  const [musicVolume, setMusicVolume] = useState(40)
+  const [ musicProgress, setMusicProgress ] = useState(0)
+  
+  // const audio = new Audio(`my-magic-protocol://getMediaFile/${filePath}`)
+
+  playingSongObject.volume = musicVolume / 100
+
+  playingSongObject.ontimeupdate = () => {
+    setMusicProgress(playingSongObject.currentTime)
+  }
+
+  const musicEndTime = playingSongObject.duration
 
 
-  const playMusic = () => {
+  const totalTime = useMemo(()=>intoMinutes(musicEndTime),[musicEndTime]) 
+  const currentTime = useMemo(()=>intoMinutes(musicProgress),[musicProgress]) 
+
+  // set play status to pause when song ends
+  useEffect(() => {
+    if (isPlaying) {
+      musicProgress === musicEndTime ? setIsPlaying(false) : setIsPlaying(true)
+    }
+  }, [musicProgress]) 
+
+  // play and pause toggle function
+  const togglePlay = () => {
     if (filePath === "" || songName === "" || filePath === undefined || songName === undefined || filePath === null || songName === null) return
-    console.log(filePath)
     ipcRenderer.send("music:play", filePath)
 
     if (isPlaying) {
-      // console.log(audio,'pause')
-      if(audio != null){
-        audio.pause()
-        audio.currentTime=0
+      if(playingSongObject != null){
+        playingSongObject.pause()
+        // playingSongObject.currentTime=0 // for starting from beginning
         setIsPlaying(false)
-
       }
     } else {
-      audio.play()
+      playingSongObject.play()
+      setIsPlaying(true)
+    }
+  }
+
+  // start over function
+  const startOver = () => {
+    if(playingSongObject != null){
+      playingSongObject.currentTime = 0
+      playingSongObject.play()
       setIsPlaying(true)
     }
   }
@@ -70,12 +97,13 @@ export default function Player({ song }: prop) {
               <FaShuffle className='text-xl' />
             </IconButton>
             <IconButton
+              onClick={startOver}
               variant='text'
               className='rounded-full bg-transparent text-white active:text-[#2ec946] hover:bg-transparent active:bg-transparent '>
               <MdSkipPrevious className='text-3xl' />
             </IconButton>
             <IconButton
-              onClick={playMusic}
+              onClick={togglePlay}
               variant='text'
               className=' bg-transparent hover:bg-transparent active:bg-transparent bg-white p-3 aspect-square rounded-full flex justify-center items-center text-black active:text-[#2ec946]'>
               {!isPlaying ? (
@@ -96,11 +124,18 @@ export default function Player({ song }: prop) {
             </IconButton>
           </div>
           <div className='flex gap-2 items-center'>
-            <span className=''>{currentTime}</span>
-            <div className='bg-[#fff] w-[280px] rounded h-[3px] '>
-              <div className={`w-[20%] bg-black h-[3px]`}></div>
+            <span className='text-white'>{currentTime}</span>
+            <div className=' '>
+              <Slider 
+              onInput={(e)=> playingSongObject.currentTime = e.target.value*musicEndTime/100}
+              className="w-[300px]  text-white  hover:text-[#2ec946] h-2 "
+              barClassName=" hover:bg-[#2ec946] "
+              thumbClassName="[&::-moz-range-thumb]: [&::-webkit-slider-thumb]:"
+              trackClassName=""
+              value={musicProgress*100/musicEndTime}
+              />
             </div>
-            <span className=''>{totalTime}</span>
+            <span className='text-white'>{totalTime}</span>
           </div>
         </div>
         <div className='flex items-center gap-1 '>
@@ -109,11 +144,12 @@ export default function Player({ song }: prop) {
           </IconButton>
           <div className="">
             <Slider 
+            onInput={(e)=>setMusicVolume(e.target.value)}
             className="min-w-[100px]  text-white  hover:text-[#2ec946] h-2 "
             barClassName=" hover:bg-[#2ec946] "
             thumbClassName="[&::-moz-range-thumb]: [&::-webkit-slider-thumb]:"
             trackClassName=""
-            defaultValue={40}  />
+            value={musicVolume}  />
           </div>
         </div>
       </div>

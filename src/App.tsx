@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import "./css/background.css"
 
 import SideBar from "./components/SideBar"
@@ -20,12 +20,21 @@ function App() {
 
   const [songs, setSongs] = useState<song[]>([])
   const [playingSong, setPlayingSong] = useState<song>({})
+  const [playingSongObject, setPlayingSongObject] = useState<HTMLAudioElement>(new Audio())
+
+  useEffect(() => {
+    if(playingSongObject != null){
+      playingSongObject.pause()
+    }
+    setPlayingSongObject(new Audio(`my-magic-protocol://getMediaFile/${playingSong.filePath}`))
+    console.log(playingSongObject,'in app')
+  }, [playingSong])
 
   ipcRenderer.on("path:done", (data: song[]) => {
-    console.log("done", data)
+    // console.log("done", data)
     setSongs(data)
   })
-  console.log("app")
+  // console.log("app")
 
   const loadFile = () => {
     ipcRenderer.send("load:done")
@@ -56,7 +65,7 @@ function App() {
         <div className='w-full p-4 relative'>
           <Header page={page} changePage={setPage} />
           {generatePage()}
-          <Player song={playingSong} />
+          <Player playingSongObject={playingSongObject} song={playingSong} />
         </div>
       </div>
     </>
