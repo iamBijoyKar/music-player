@@ -33,25 +33,7 @@ function App() {
 
   const [page, setPage] = useState<string>("home")
 
-  // const search = async (text:string) => {
-  //   const url = `https://deezerdevs-deezer.p.rapidapi.com/search?q=${text}}`;
-  //   const options = {
-  //     method: 'GET',
-  //     headers: {
-  //       'X-RapidAPI-Key': '520d8cc15amshc4d1e66b86ddbb7p18c135jsn1e368fc76def',
-  //       'X-RapidAPI-Host': 'deezerdevs-deezer.p.rapidapi.com'
-  //     }
-  //   };
 
-  //   try {
-  //     const response = await fetch(url, options);
-  //     const result = await response.text();
-  //     setText(result);
-  //     console.log(result);
-  //   } catch (error) {
-  //     console.error(error);
-  //   }
-  // }
 
   return (
     <>
