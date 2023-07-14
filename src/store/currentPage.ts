@@ -1,6 +1,6 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit"
 import { initialCurrentPage } from "./state"
-
+import { RootState } from "./store"
 // Current page slice
 export const currentPageSlice = createSlice({
   name: "currentPage",
@@ -13,3 +13,5 @@ export const currentPageSlice = createSlice({
 })
 
 export const currentPageActions = currentPageSlice.actions
+export const currentPageReducer = currentPageSlice.reducer
+export const selectCount = (state: RootState) => state.currentPage.currentPage

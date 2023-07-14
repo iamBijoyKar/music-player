@@ -7,6 +7,7 @@ import Player from "./components/Player"
 import Home from "./components/Home"
 
 import { remote } from "electron"
+import { useAppSelector } from "./hooks/hooks"
 
 type song = {
   songName: string
@@ -18,16 +19,23 @@ function App() {
   // const x_rapidapi_key: string = import.meta.env.VITE_X_RAPIDAPI_KEY
   // const x_rapidapi_host: string = import.meta.env.VITE_X_RAPIDAPI_HOST
 
+  // const currentPage = useSelector((state: RootState) => state.currentPage.value)
+  const currentPage = useAppSelector((state) => state.currentPage.currentPage)
+
   const [songs, setSongs] = useState<song[]>([])
   const [playingSong, setPlayingSong] = useState<song>({})
-  const [playingSongObject, setPlayingSongObject] = useState<HTMLAudioElement>(new Audio())
+  const [playingSongObject, setPlayingSongObject] = useState<HTMLAudioElement>(
+    new Audio()
+  )
 
   useEffect(() => {
-    if(playingSongObject != null){
+    if (playingSongObject != null) {
       playingSongObject.pause()
     }
-    setPlayingSongObject(new Audio(`my-magic-protocol://getMediaFile/${playingSong.filePath}`))
-    console.log(playingSongObject,'in app')
+    setPlayingSongObject(
+      new Audio(`my-magic-protocol://getMediaFile/${playingSong.filePath}`)
+    )
+    console.log(playingSongObject, "in app")
   }, [playingSong])
 
   ipcRenderer.on("path:done", (data: song[]) => {
@@ -40,10 +48,8 @@ function App() {
     ipcRenderer.send("load:done")
   }
 
-  const [page, setPage] = useState<string>("home")
-
   const generatePage = () => {
-    switch (page) {
+    switch (currentPage) {
       case "home":
         return <Home changeSong={setPlayingSong} songs={songs} />
       case "library":
@@ -57,13 +63,13 @@ function App() {
     }
   }
 
-
   return (
     <>
       <div onLoad={loadFile} className='app flex flex-row min-h-[100vh]'>
-        <SideBar page={page} changePage={setPage} />
+        <SideBar />
         <div className='w-full p-4 relative'>
-          <Header page={page} changePage={setPage} />
+          <Header />
+          {/* <h1>{currentPage}</h1> */}
           {generatePage()}
           <Player playingSongObject={playingSongObject} song={playingSong} />
         </div>
