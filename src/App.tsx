@@ -7,7 +7,9 @@ import Player from "./components/Player"
 import Home from "./components/Home"
 
 import { remote } from "electron"
-import { useAppSelector } from "./hooks/hooks"
+import { useAppSelector, useAppDispatch } from "./hooks/hooks"
+import { songListActions } from "./store/songList"
+import { Song } from "./store/stateTypes"
 
 type song = {
   songName: string
@@ -28,6 +30,8 @@ function App() {
     new Audio()
   )
 
+  const dispatch = useAppDispatch()
+
   useEffect(() => {
     if (playingSongObject != null) {
       playingSongObject.pause()
@@ -38,9 +42,10 @@ function App() {
     console.log(playingSongObject, "in app")
   }, [playingSong])
 
-  ipcRenderer.on("path:done", (data: song[]) => {
+  ipcRenderer.on("path:done", (data: Song[]) => {
     // console.log("done", data)
-    setSongs(data)
+    // setSongs(data)
+    dispatch(songListActions.addSongs(data))
   })
   // console.log("app")
 
@@ -51,7 +56,7 @@ function App() {
   const generatePage = () => {
     switch (currentPage) {
       case "home":
-        return <Home changeSong={setPlayingSong} songs={songs} />
+        return <Home />
       case "library":
         return <h1>Playlist</h1>
       case "settings":
@@ -71,7 +76,7 @@ function App() {
           <Header />
           {/* <h1>{currentPage}</h1> */}
           {generatePage()}
-          <Player playingSongObject={playingSongObject} song={playingSong} />
+          {/* <Player playingSongObject={playingSongObject} song={playingSong} /> */}
         </div>
       </div>
     </>
