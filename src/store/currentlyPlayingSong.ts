@@ -1,6 +1,7 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit"
 import { initialCurrentlyPlayingSong } from "./state"
 import { Song } from "./stateTypes"
+import { RootState } from "./store"
 
 // Currently playing song slice
 export const currentlyPlayingSongSlice = createSlice({
@@ -9,12 +10,21 @@ export const currentlyPlayingSongSlice = createSlice({
   reducers: {
     changeCurrentlyPlayingSong: (state, action: PayloadAction<Song>) => {
       state.song = action.payload
+      const str = `my-magic-protocol://getMediaFile/${action.payload.file.filePath}`
+      if (state.songAudioObject) {
+        state.songAudioObject.pause()
+      }
+      if (state.playingStatus) {
+        state.playingStatus = false
+      }
+      state.songAudioObject = new Audio(str)
     },
     changeCurrentlyPlayingSongAudioObject: (
       state,
-      action: PayloadAction<HTMLAudioElement>
+      action: PayloadAction<Song>
     ) => {
-      state.songAudioObject = action.payload
+      const str = `my-magic-protocol://getMediaFile/${action.payload.file.filePath}`
+      state.songAudioObject = new Audio(str)
     },
     changeCurrentlyPlayingSongCurrentTime: (
       state,
@@ -38,3 +48,6 @@ export const currentlyPlayingSongSlice = createSlice({
 })
 
 export const currentlyPlayingSongActions = currentlyPlayingSongSlice.actions
+export const currentlyPlayingSongReducer = currentlyPlayingSongSlice.reducer
+export const currentlyPlayingSongSelector = (state: RootState) =>
+  state.currentlyPlayingSong

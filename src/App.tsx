@@ -6,9 +6,9 @@ import Header from "./components/Header"
 import Player from "./components/Player"
 import Home from "./components/Home"
 
-import { remote } from "electron"
 import { useAppSelector, useAppDispatch } from "./hooks/hooks"
 import { songListActions } from "./store/songList"
+import { currentlyPlayingSongActions } from "./store/currentlyPlayingSong"
 import { Song } from "./store/stateTypes"
 
 type song = {
@@ -18,28 +18,25 @@ type song = {
 }
 
 function App() {
-  // const x_rapidapi_key: string = import.meta.env.VITE_X_RAPIDAPI_KEY
-  // const x_rapidapi_host: string = import.meta.env.VITE_X_RAPIDAPI_HOST
-
-  // const currentPage = useSelector((state: RootState) => state.currentPage.value)
   const currentPage = useAppSelector((state) => state.currentPage.currentPage)
 
-  const [songs, setSongs] = useState<song[]>([])
-  const [playingSong, setPlayingSong] = useState<song>({})
-  const [playingSongObject, setPlayingSongObject] = useState<HTMLAudioElement>(
-    new Audio()
+  const playingSong = useAppSelector((state) => state.currentlyPlayingSong.song)
+  const playingSongObject = useAppSelector(
+    (state) => state.currentlyPlayingSong.songAudioObject
   )
 
   const dispatch = useAppDispatch()
+
+  const setPlayingSongObject = (song: Song) => {
+    dispatch(currentlyPlayingSongActions.changeCurrentlyPlayingSong(song))
+  }
 
   useEffect(() => {
     if (playingSongObject != null) {
       playingSongObject.pause()
     }
-    setPlayingSongObject(
-      new Audio(`my-magic-protocol://getMediaFile/${playingSong.filePath}`)
-    )
-    console.log(playingSongObject, "in app")
+    setPlayingSongObject(playingSong)
+    // console.log(playingSongObject, "in app")
   }, [playingSong])
 
   ipcRenderer.on("path:done", (data: Song[]) => {
@@ -76,7 +73,7 @@ function App() {
           <Header />
           {/* <h1>{currentPage}</h1> */}
           {generatePage()}
-          {/* <Player playingSongObject={playingSongObject} song={playingSong} /> */}
+          <Player />
         </div>
       </div>
     </>

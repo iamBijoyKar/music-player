@@ -9,7 +9,7 @@ export default function Home() {
   const dispatch = useAppDispatch()
 
   const changeSong = (song: Song) => {
-    // dispatch(currentlyPlayingSongActions.changeCurrentlyPlayingSong(song))
+    dispatch(currentlyPlayingSongActions.changeCurrentlyPlayingSong(song))
   }
 
   return (
