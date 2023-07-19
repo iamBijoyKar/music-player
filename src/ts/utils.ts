@@ -1,3 +1,5 @@
 export function intoMinutes(seconds: number): string {
-  return `${Math.floor(seconds / 60)}:${seconds % 60}`
+  const minutes = Math.floor(seconds / 60)
+  const second = Math.floor(seconds % 60)
+  return `${minutes}:${second < 10 ? '0' : ''}${second}`
 }

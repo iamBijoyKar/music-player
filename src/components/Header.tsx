@@ -8,14 +8,10 @@ import {
   Typography,
 } from "@material-tailwind/react"
 import defaultProfilePic from "../assets/profile.png"
+import { useAppSelector } from "../hooks/hooks"
 
-type Props = {
-  page: string
-  changePage: (page: string) => void
-}
-
-export default function Header(prop: Props) {
-  const { page } = prop
+export default function Header() {
+  const page = useAppSelector((state) => state.currentPage.currentPage)
   return (
     <>
       <header className='flex flex-col  '>

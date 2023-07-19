@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import "./css/background.css"
 
 import SideBar from "./components/SideBar"
@@ -6,7 +6,10 @@ import Header from "./components/Header"
 import Player from "./components/Player"
 import Home from "./components/Home"
 
-import { remote } from "electron"
+import { useAppSelector, useAppDispatch } from "./hooks/hooks"
+import { songListActions } from "./store/songList"
+import { currentlyPlayingSongActions } from "./store/currentlyPlayingSong"
+import { Song } from "./store/stateTypes"
 
 type song = {
   songName: string
@@ -15,52 +18,62 @@ type song = {
 }
 
 function App() {
-  const x_rapidapi_key: string = import.meta.env.VITE_X_RAPIDAPI_KEY
-  const x_rapidapi_host: string = import.meta.env.VITE_X_RAPIDAPI_HOST
+  const currentPage = useAppSelector((state) => state.currentPage.currentPage)
 
-  const [songs, setSongs] = useState<song[]>([])
-  const [playingSong, setPlayingSong] = useState<song>({})
+  const playingSong = useAppSelector((state) => state.currentlyPlayingSong.song)
+  const playingSongObject = useAppSelector(
+    (state) => state.currentlyPlayingSong.songAudioObject
+  )
 
-  ipcRenderer.on("path:done", (data: song[]) => {
-    console.log("done", data)
-    setSongs(data)
+  const dispatch = useAppDispatch()
+
+  const setPlayingSongObject = (song: Song) => {
+    dispatch(currentlyPlayingSongActions.changeCurrentlyPlayingSong(song))
+  }
+
+  useEffect(() => {
+    if (playingSongObject != null) {
+      playingSongObject.pause()
+    }
+    setPlayingSongObject(playingSong)
+    // console.log(playingSongObject, "in app")
+  }, [playingSong])
+
+  ipcRenderer.on("path:done", (data: Song[]) => {
+    // console.log("done", data)
+    // setSongs(data)
+    dispatch(songListActions.addSongs(data))
   })
-  console.log("app")
+  // console.log("app")
 
   const loadFile = () => {
     ipcRenderer.send("load:done")
   }
 
-  const [page, setPage] = useState<string>("home")
-
-  // const search = async (text:string) => {
-  //   const url = `https://deezerdevs-deezer.p.rapidapi.com/search?q=${text}}`;
-  //   const options = {
-  //     method: 'GET',
-  //     headers: {
-  //       'X-RapidAPI-Key': '520d8cc15amshc4d1e66b86ddbb7p18c135jsn1e368fc76def',
-  //       'X-RapidAPI-Host': 'deezerdevs-deezer.p.rapidapi.com'
-  //     }
-  //   };
-
-  //   try {
-  //     const response = await fetch(url, options);
-  //     const result = await response.text();
-  //     setText(result);
-  //     console.log(result);
-  //   } catch (error) {
-  //     console.error(error);
-  //   }
-  // }
+  const generatePage = () => {
+    switch (currentPage) {
+      case "home":
+        return <Home />
+      case "library":
+        return <h1>Playlist</h1>
+      case "settings":
+        return <h1>Settings</h1>
+      case "search":
+        return <h1>Search</h1>
+      default:
+        return <h1>Home</h1>
+    }
+  }
 
   return (
     <>
       <div onLoad={loadFile} className='app flex flex-row min-h-[100vh]'>
-        <SideBar page={page} changePage={setPage} />
+        <SideBar />
         <div className='w-full p-4 relative'>
-          <Header page={page} changePage={setPage} />
-          <Home changeSong={setPlayingSong} songs={songs} />
-          <Player song={playingSong} />
+          <Header />
+          {/* <h1>{currentPage}</h1> */}
+          {generatePage()}
+          <Player />
         </div>
       </div>
     </>

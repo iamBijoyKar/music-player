@@ -11,15 +11,17 @@ import { Tooltip } from "@material-tailwind/react"
 import momoLogo from "../assets/peach.png"
 
 import { useState } from "react"
+import { useAppDispatch, useAppSelector } from "../hooks/hooks"
+import { currentPageActions } from "../store/currentPage"
 
-type Props = {
-  page: string
-  changePage: (page: string) => void
-}
-
-export default function SideBar(prop: Props) {
+export default function SideBar() {
   const [isMenuOpen, setIsMenuOpen] = useState<boolean>(false)
-  const { page, changePage } = prop
+  const page = useAppSelector((state) => state.currentPage.currentPage)
+  const dispatch = useAppDispatch()
+
+  const changePage = (page: string) => {
+    dispatch(currentPageActions.changeCurrentPage(page))
+  }
 
   return (
     <>
